@@ -1,10 +1,14 @@
-import { View, Text } from 'react-native';
+import { View, Text, Button } from 'react-native';
 import React from 'react';
+import useAuth from '../hooks/useAuth';
 
 const Login = () => {
+  const { authGoogle, request }: Record<string, any> = useAuth();
+
   return (
     <View>
-      <Text>Login</Text>
+      <Text>Login now yoo </Text>
+      <Button title="login" onPress={authGoogle} disabled={!request} />
     </View>
   );
 };
