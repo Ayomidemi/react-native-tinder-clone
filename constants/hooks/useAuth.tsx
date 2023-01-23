@@ -1,7 +1,22 @@
-import React, { createContext, ReactElement, useContext, useState } from 'react';
+import React, {
+  createContext,
+  ReactElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import * as env from '../../env';
+
+import {
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithCredential,
+  signOut,
+} from 'firebase/auth';
+import { auth } from '../firebase/firebase';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -20,39 +35,66 @@ const config = {
 const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }: Props) => {
-  const [request, response, googlePromptLogin] = Google.useAuthRequest(config);
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest(config);
 
   const [accessToken, setAccessToken] = useState<string | undefined>('');
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const authGoogle = async () => {
-    await googlePromptLogin();
+    await promptAsync()
+      .then(async (res) => {
+        if (res?.type === 'success') {
+          const { id_token } = res.params;
+          setAccessToken(id_token);
+
+          const credential = GoogleAuthProvider.credential(id_token);
+          await signInWithCredential(auth, credential);
+        }
+        return Promise.reject();
+      })
+      .catch((err) => setError(err))
+      .finally(() => setLoading(false));
   };
 
-  async function fetchUserInfo() {
-    const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const userInfo = await res.json();
-    setUser(userInfo);
-  }
-
-  React.useEffect(() => {
-    if (response?.type === 'success') {
-      console.log('successful');
-      setAccessToken(response.authentication?.accessToken);
-      accessToken && fetchUserInfo();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken, response]);
-
-  return (
-    <AuthContext.Provider value={{ user: user, authGoogle, request }}>
-      {children}
-    </AuthContext.Provider>
+  useEffect(
+    () =>
+      onAuthStateChanged(auth, (userr) => {
+        if (userr) {
+          setUser(userr);
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }),
+    [],
   );
+
+  const logout = () => {
+    setLoading(true);
+
+    signOut(auth)
+      .catch((err) => setError(err))
+      .finally(() => setLoading(false));
+  };
+
+  const memoedValued = useMemo(
+    () => ({
+      user,
+      authGoogle,
+      request,
+      loading,
+      error,
+      logout,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [authGoogle, error, loading, user],
+  );
+
+  // console.log(user);
+
+  return <AuthContext.Provider value={memoedValued}>{!loading && children}</AuthContext.Provider>;
 };
 
 export default function useAuth() {
