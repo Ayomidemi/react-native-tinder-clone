@@ -15,11 +15,11 @@ const Login = () => {
   }, [navigation]);
 
   return (
-    <View className="flex-1 ">
+    <View className="flex-1">
       <ImageBackground
         source={{ uri: 'https://tinder.com/static/tinder.png' }}
         resizeMode="cover"
-        className="flex-1 "
+        className="flex-1"
       >
         <TouchableOpacity
           className="absolute bottom-40 w-52 bg-white p-4 rounded-xl"
