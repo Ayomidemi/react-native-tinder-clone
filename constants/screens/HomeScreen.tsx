@@ -5,8 +5,19 @@ import useAuth from '../hooks/useAuth';
 
 import { AntDesign, Ionicons, Entypo } from '@expo/vector-icons';
 import Swiper from 'react-native-deck-swiper';
-import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  setDoc,
+  where,
+} from 'firebase/firestore';
 import { db } from '../firebase/firebase';
+import generateId from '../lib/generateId';
 
 const HomeScreen = () => {
   const { logout, user }: Record<string, any> = useAuth();
@@ -31,16 +42,30 @@ const HomeScreen = () => {
     let unsub;
 
     const fetchCards = async () => {
-      unsub = onSnapshot(collection(db, 'users'), (snapshot) => {
-        setProfiles(
-          snapshot.docs
-            .filter((docc) => docc.id !== user.uid)
-            .map((docc) => ({
-              id: docc.id,
-              ...docc.data(),
-            })),
-        );
-      });
+      const passes = await getDocs(collection(db, 'users', user.uid, 'passes')).then((snapshot) =>
+        snapshot.docs.map((doccc) => doccc.id),
+      );
+
+      const swipes = await getDocs(collection(db, 'users', user.uid, 'swipes')).then((snapshot) =>
+        snapshot.docs.map((doccc) => doccc.id),
+      );
+
+      const passedUserIds = passes.length > 0 ? passes : ['tests'];
+      const swipedUserIds = swipes.length > 0 ? swipes : ['tests'];
+
+      unsub = onSnapshot(
+        query(collection(db, 'users'), where('id', 'not-in', [...passedUserIds, ...swipedUserIds])),
+        (snapshot) => {
+          setProfiles(
+            snapshot.docs
+              .filter((docc) => docc.id !== user.uid)
+              .map((docc) => ({
+                id: docc.id,
+                ...docc.data(),
+              })),
+          );
+        },
+      );
     };
 
     fetchCards();
@@ -55,8 +80,40 @@ const HomeScreen = () => {
     setDoc(doc(db, 'users', user.uid, 'passes', userSwiped.id), userSwiped);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const swipeRight = async (cardIndex: number) => {};
+  const swipeRight = async (cardIndex: number) => {
+    if (!profiles[cardIndex]) return;
+
+    const userSwiped = profiles[cardIndex];
+    const loggedInProfile = await (await getDoc(doc(db, 'users', user.uid))).data();
+
+    // check if user swiped on you...
+    getDoc(doc(db, 'users', userSwiped.uid, 'swipes', user.uid))
+      .then((documentSnapshot) => {
+        if (documentSnapshot.exists()) {
+          // user has matched with you before you matched on them... create a match
+          console.log('Yall matched... boohooo');
+
+          setDoc(doc(db, 'users', user.uid, 'swipes', userSwiped.id), userSwiped);
+
+          //  create a match
+          setDoc(doc(db, 'matches', generateId(user.uid, userSwiped.id)), {
+            users: {
+              [user.uid]: loggedInProfile,
+              [userSwiped.id]: userSwiped,
+            },
+            usersMatched: [user.uid, userSwiped.id],
+            timeStamped: serverTimestamp(),
+          });
+
+          navigation.navigate('MatchedScreen', { loggedInProfile, userSwiped });
+        } else {
+          console.log('Yall swiped... noobo');
+
+          setDoc(doc(db, 'users', user.uid, 'swipes', userSwiped.id), userSwiped);
+        }
+      })
+      .catch((err) => console.log(err));
+  };
 
   return (
     <SafeAreaView className="flex-1">
