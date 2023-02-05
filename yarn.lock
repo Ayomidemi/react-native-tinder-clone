@@ -1284,10 +1284,18 @@
     joi "^17.4.2"
     semver "^7.3.5"
 
-"@expo/eas-json@3.3.2":
-  version "3.3.2"
-  resolved "https://registry.npmjs.org/@expo/eas-json/-/eas-json-3.3.2.tgz"
-  integrity sha512-O85CbdCXUjzUOyXITpVT7qnnIqdRaaEiaY7gCeYYW4c9KUO0fNobiePKBAYTFzoSJMt5bJT9jkwKNk3dML8zkQ==
+"@expo/eas-build-job@0.2.103":
+  version "0.2.103"
+  resolved "https://registry.yarnpkg.com/@expo/eas-build-job/-/eas-build-job-0.2.103.tgz#0b587ada854570bc664f59dcd43dc3ca4221d451"
+  integrity sha512-cstgN8sVIYjq37xHm/4E6jnAlYf1gndvWfuVzRicUjp1TVyGjV9IbilSOxJp8AEqgPZK6+bZOcMRXT634M0Nmg==
+  dependencies:
+    joi "^17.4.2"
+    semver "^7.3.5"
+
+"@expo/eas-json@3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@expo/eas-json/-/eas-json-3.5.0.tgz#f95a27f95aa7c81b7d3a6a609600c1363f28489b"
+  integrity sha512-4os4Crd5wiO2zTNnDMXCiIr7MGJaSaQGM8Uq31DLVUuIM61FCTo3KMlrC7rfkLAR1VwsqZddQN/HQIRdID81Gw==
   dependencies:
     "@babel/code-frame" "7.18.6"
     "@expo/eas-build-job" "0.2.102"
@@ -4068,18 +4076,18 @@ dotenv@16.0.3, dotenv@^16.0.3:
   resolved "https://registry.npmjs.org/dotenv/-/dotenv-16.0.3.tgz"
   integrity sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==
 
-eas-cli@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.npmjs.org/eas-cli/-/eas-cli-3.4.0.tgz"
-  integrity sha512-LS34Nf33q5n8XNTxzZIxgsdlVrlro6yibk4pkvstgPigPD1X2O8tanB0D5FRBShoVsNrxM9rmD/tbnP5pSq4Bg==
+eas-cli@^3.5.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/eas-cli/-/eas-cli-3.5.1.tgz#4d463fd84355dffc68a7b6c64f1ddf79a44e5a8c"
+  integrity sha512-JyepyTHmDM7hb/NugeomoXozKqk76uaQXfs1mru7vU9lmpwNOjsLg52nqlmbbHtDlc+Lcb97gZE43bYVjGiJdg==
   dependencies:
     "@expo/apple-utils" "0.0.0-alpha.34"
     "@expo/code-signing-certificates" "0.0.5"
     "@expo/config" "7.0.3"
     "@expo/config-plugins" "5.0.4"
     "@expo/config-types" "47.0.0"
-    "@expo/eas-build-job" "0.2.102"
-    "@expo/eas-json" "3.3.2"
+    "@expo/eas-build-job" "0.2.103"
+    "@expo/eas-json" "3.5.0"
     "@expo/json-file" "8.2.37"
     "@expo/multipart-body-parser" "1.1.0"
     "@expo/osascript" "2.0.33"
